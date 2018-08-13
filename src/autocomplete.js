@@ -56,6 +56,7 @@ export default class Autocomplete extends Component {
     name: 'input-autocomplete',
     placeholder: '',
     onConfirm: () => {},
+    onOptionExit: () => {},
     confirmOnBlur: true,
     showNoOptionsFound: true,
     showAllValues: false,
@@ -85,7 +86,8 @@ export default class Autocomplete extends Component {
     this.handleEnter = this.handleEnter.bind(this)
     this.handlePrintableKey = this.handlePrintableKey.bind(this)
 
-    this.handleOptionBlur = this.handleOptionBlur.bind(this)
+    this.handleOptionKeyUp = this.handleOptionKeyUp.bind(this)
+    this.handleOptionKeyDown = this.handleOptionKeyDown.bind(this)
     this.handleOptionClick = this.handleOptionClick.bind(this)
     this.handleOptionFocus = this.handleOptionFocus.bind(this)
     this.handleOptionMouseDown = this.handleOptionMouseDown.bind(this)
@@ -178,18 +180,25 @@ export default class Autocomplete extends Component {
     })
   }
 
-  handleOptionBlur (event, index) {
+  handleOptionKeyUp (event, index) {
     const { focused, menuOpen, options, selected } = this.state
     const focusingOutsideComponent = event.relatedTarget === null
     const focusingInput = event.relatedTarget === this.elementReferences[-1]
     const focusingAnotherOption = focused !== index && focused !== -1
     const blurComponent = (!focusingAnotherOption && focusingOutsideComponent) || !(focusingAnotherOption || focusingInput)
-    if (blurComponent) {
+
+    if (blurComponent && event.keyCode == 13) {
       const keepMenuOpen = menuOpen && isIosDevice()
       this.handleComponentBlur({
         menuOpen: keepMenuOpen,
         query: this.templateInputValue(options[selected])
       })
+    }
+  }
+
+  handleOptionKeyDown (event) {
+    if(event.keyCode == 9) {
+      this.props.onOptionExit();
     }
   }
 
@@ -507,7 +516,8 @@ export default class Autocomplete extends Component {
                 dangerouslySetInnerHTML={{ __html: this.templateSuggestion(option) }}
                 id={`${id}__option--${index}`}
                 key={index}
-                onBlur={(event) => this.handleOptionBlur(event, index)}
+                onKeyDown={(event) => this.handleOptionKeyDown(event, index)}
+                onKeyUp={(event) => this.handleOptionKeyUp(event, index)}
                 onClick={(event) => this.handleOptionClick(event, index)}
                 onMouseDown={this.handleOptionMouseDown}
                 onMouseEnter={(event) => this.handleOptionMouseEnter(event, index)}
