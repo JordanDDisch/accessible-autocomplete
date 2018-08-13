@@ -15,11 +15,14 @@ const keyCodes = {
 
 // Based on https://github.com/ausi/Feature-detection-technique-for-pointer-events
 const hasPointerEvents = (() => {
+  let element;
   if(typeof document != 'undefined') {
-    const element = document.createElement('x')
+    element = document.createElement('x')
+    element.style.cssText = 'pointer-events:auto'
+    return element.style.pointerEvents === 'auto'
+  } else {
+    return null;
   }
-  element.style.cssText = 'pointer-events:auto'
-  return element.style.pointerEvents === 'auto'
 })()
 
 function isIosDevice () {
