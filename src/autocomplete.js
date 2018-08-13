@@ -15,7 +15,9 @@ const keyCodes = {
 
 // Based on https://github.com/ausi/Feature-detection-technique-for-pointer-events
 const hasPointerEvents = (() => {
-  const element = document.createElement('x')
+  if(document) {
+    const element = document.createElement('x')
+  }
   element.style.cssText = 'pointer-events:auto'
   return element.style.pointerEvents === 'auto'
 })()
