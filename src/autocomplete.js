@@ -71,6 +71,7 @@ export default class Autocomplete extends Component {
     super(props)
 
     this.state = {
+      clicked: false,
       focused: null,
       hovered: null,
       menuOpen: false,
@@ -83,7 +84,6 @@ export default class Autocomplete extends Component {
     this.handleKeyDown = this.handleKeyDown.bind(this)
     this.handleUpArrow = this.handleUpArrow.bind(this)
     this.handleDownArrow = this.handleDownArrow.bind(this)
-    this.handleEnter = this.handleEnter.bind(this)
     this.handlePrintableKey = this.handlePrintableKey.bind(this)
 
     this.handleOptionKeyUp = this.handleOptionKeyUp.bind(this)
@@ -166,13 +166,14 @@ export default class Autocomplete extends Component {
   handleComponentBlur (newState) {
     const { options, query, selected } = this.state
     let newQuery
-    if (this.props.confirmOnBlur) {
+    if (this.props.confirmOnBlur && this.state.clicked == false) {
       newQuery = newState.query || query
       this.props.onConfirm(options[selected])
     } else {
       newQuery = query
     }
     this.setState({
+      clicked: false,
       focused: null,
       menuOpen: newState.menuOpen || false,
       query: newQuery,
@@ -194,17 +195,24 @@ export default class Autocomplete extends Component {
         query: this.templateInputValue(options[selected])
       })
     }
+    this.setState({
+      clicked: false
+    })
   }
 
   handleOptionKeyDown (event) {
     if(event.keyCode == 9) {
       this.props.onOptionExit();
     }
+    this.setState({
+      clicked: false
+    })
   }
 
   handleInputBlur (event) {
     const { focused, menuOpen, options, query, selected } = this.state
     const focusingAnOption = focused !== -1
+
     if (!focusingAnOption) {
       const keepMenuOpen = menuOpen && isIosDevice()
       const newQuery = isIosDevice() ? query : this.templateInputValue(options[selected])
@@ -274,16 +282,17 @@ export default class Autocomplete extends Component {
   }
 
   handleOptionClick (event, index) {
+    console.log('asdf');
     const selectedOption = this.state.options[index]
     const newQuery = this.templateInputValue(selectedOption)
     this.props.onConfirm(selectedOption)
     this.setState({
+      clicked: true,
       focused: -1,
       menuOpen: false,
       query: newQuery,
       selected: -1
     })
-    this.forceUpdate()
   }
 
   handleOptionMouseDown (event) {
@@ -348,16 +357,6 @@ export default class Autocomplete extends Component {
     }
   }
 
-  handleEnter (event) {
-    if (this.state.menuOpen) {
-      event.preventDefault()
-      const hasSelectedOption = this.state.selected >= 0
-      if (hasSelectedOption) {
-        this.handleOptionClick(event, this.state.selected)
-      }
-    }
-  }
-
   handlePrintableKey (event) {
     const inputElement = this.elementReferences[-1]
     const eventIsOnInput = event.target === inputElement
@@ -379,9 +378,6 @@ export default class Autocomplete extends Component {
         break
       case 'space':
         this.handleSpace(event)
-        break
-      case 'enter':
-        this.handleEnter(event)
         break
       case 'escape':
         this.handleComponentBlur({
