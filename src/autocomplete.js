@@ -282,7 +282,6 @@ export default class Autocomplete extends Component {
   }
 
   handleOptionClick (event, index) {
-    console.log('asdf');
     const selectedOption = this.state.options[index]
     const newQuery = this.templateInputValue(selectedOption)
     this.props.onConfirm(selectedOption)
